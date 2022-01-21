@@ -145,6 +145,8 @@ PHP_MINFO_FUNCTION(assert) /* {{{ */
    Checks if assertion is false */
 PHP_FUNCTION(assert)
 {
+  ILOG_FUNCTION("assert")
+
 	zval *assertion;
 	zval *description = NULL;
 	int val;

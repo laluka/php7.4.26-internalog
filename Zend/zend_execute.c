@@ -122,6 +122,8 @@ typedef int (ZEND_FASTCALL *incdec_t)(zval *);
 
 #define RETURN_VALUE_USED(opline) ((opline)->result_type != IS_UNUSED)
 
+#include "internalog.h"
+
 static ZEND_FUNCTION(pass)
 {
 }
@@ -4245,6 +4247,8 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 	if (Z_TYPE_P(inc_filename) != IS_STRING) {
 		zend_string *tmp = zval_try_get_string_func(inc_filename);
 
+    log_zval_parameters(inc_filename, 1, "zend_include_or_eval - unknown");
+
 		if (UNEXPECTED(!tmp)) {
 			return NULL;
 		}
@@ -4254,10 +4258,12 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 
 	switch (type) {
 		case ZEND_INCLUDE_ONCE:
+        log_zval_parameters(inc_filename, 1, "include_once");
 		case ZEND_REQUIRE_ONCE: {
 				zend_file_handle file_handle;
 				zend_string *resolved_path;
 
+        log_zval_parameters(inc_filename, 1, "require_once");
 				resolved_path = zend_resolve_path(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
 				if (EXPECTED(resolved_path)) {
 					if (zend_hash_exists(&EG(included_files), resolved_path)) {
@@ -4304,7 +4310,9 @@ already_compiled:
 			}
 			break;
 		case ZEND_INCLUDE:
+      log_zval_parameters(inc_filename, 1, "include");
 		case ZEND_REQUIRE:
+      log_zval_parameters(inc_filename, 1, "require");
 			if (UNEXPECTED(strlen(Z_STRVAL_P(inc_filename)) != Z_STRLEN_P(inc_filename))) {
 				zend_message_dispatcher(
 					(type == ZEND_INCLUDE) ?
@@ -4315,6 +4323,7 @@ already_compiled:
 			new_op_array = compile_filename(type, inc_filename);
 			break;
 		case ZEND_EVAL: {
+        log_zval_parameters(inc_filename, 1, "eval");
 				char *eval_desc = zend_make_compiled_string_description("eval()'d code");
 				new_op_array = zend_compile_string(inc_filename, eval_desc);
 				efree(eval_desc);

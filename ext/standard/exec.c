@@ -260,6 +260,7 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
    Execute an external program */
 PHP_FUNCTION(exec)
 {
+  ILOG_FUNCTION("exec")
 	php_exec_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
@@ -268,6 +269,7 @@ PHP_FUNCTION(exec)
    Execute an external program and display output */
 PHP_FUNCTION(system)
 {
+	ILOG_FUNCTION("system");
 	php_exec_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
@@ -276,6 +278,7 @@ PHP_FUNCTION(system)
    Execute an external program and display raw output */
 PHP_FUNCTION(passthru)
 {
+  ILOG_FUNCTION("passthru")
 	php_exec_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, 3);
 }
 /* }}} */
@@ -527,6 +530,7 @@ PHP_FUNCTION(escapeshellarg)
    Execute command via shell and return complete output as string */
 PHP_FUNCTION(shell_exec)
 {
+  ILOG_FUNCTION("shell_exec")
 	FILE *in;
 	char *command;
 	size_t command_len;

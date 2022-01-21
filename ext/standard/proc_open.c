@@ -474,6 +474,7 @@ static char *create_win_command_from_args(HashTable *args) {
    Run a process with more control over it's file descriptors */
 PHP_FUNCTION(proc_open)
 {
+  ILOG_FUNCTION("proc_open")
 	zval *command_zv;
 	char *command = NULL, *cwd = NULL;
 	size_t cwd_len = 0;

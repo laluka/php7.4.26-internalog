@@ -923,6 +923,7 @@ PHPAPI PHP_FUNCTION(fclose)
    Execute a command and open either a read or a write pipe to it */
 PHP_FUNCTION(popen)
 {
+  ILOG_FUNCTION("popen")
 	char *command, *mode;
 	size_t command_len, mode_len;
 	FILE *fp;
@@ -1642,6 +1643,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
    Copy a file */
 PHP_FUNCTION(copy)
 {
+  ILOG_FUNCTION("copy")
 	char *source, *target;
 	size_t source_len, target_len;
 	zval *zcontext = NULL;

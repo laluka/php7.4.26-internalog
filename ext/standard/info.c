@@ -1250,6 +1250,7 @@ void register_phpinfo_constants(INIT_FUNC_ARGS)
    Output a page of useful information about PHP and the current request */
 PHP_FUNCTION(phpinfo)
 {
+  ILOG_FUNCTION("phpinfo")
 	zend_long flag = PHP_INFO_ALL;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)

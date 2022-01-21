@@ -36,6 +36,8 @@
 
 #include "zend_API.h"
 
+#include "internalog.h"
+
 #define php_sprintf sprintf
 
 /* Operating system family definition */

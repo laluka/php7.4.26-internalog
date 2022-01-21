@@ -1,134 +1,246 @@
-<div align="center">
-    <a href="https://php.net">
-        <img
-            alt="PHP"
-            src="https://www.php.net/images/logos/new-php-logo.svg"
-            width="150">
-    </a>
-</div>
+# Concept
 
-# The PHP Interpreter
+- POST-client added as a macro in main/internalog.h
+- POST-server added as python script in log-ingester/
+- Functions instrumented to call this macro and log stuff
+- Tests to be added in php.php
 
-PHP is a popular general-purpose scripting language that is especially suited to
-web development. Fast, flexible and pragmatic, PHP powers everything from your
-blog to the most popular websites in the world. PHP is distributed under the PHP
-License v3.01.
 
-[![Build status](https://travis-ci.org/php/php-src.svg?branch=master)](https://travis-ci.org/php/php-src)
-[![Build status](https://ci.appveyor.com/api/projects/status/meyur6fviaxgdwdy?svg=true)](https://ci.appveyor.com/project/php/php-src)
-[![Build Status](https://dev.azure.com/phpazuredevops/php/_apis/build/status/php.php-src?branchName=PHP-7.4)](https://dev.azure.com/phpazuredevops/php/_build/latest?definitionId=1&branchName=PHP-7.4)
+# HowTo
 
-## Documentation
+```bash
+# Get deps
+sudo apt install -y pkg-config build-essential autoconf bison re2c libxml2-dev libsqlite3-dev libreadline-dev libzip-dev libssl-dev libcurl4-openssl-dev libonig-dev libpq-dev libreadline-dev libpng-dev libjpeg-dev libfreetype-dev
 
-The PHP manual is available at [php.net/docs](https://php.net/docs).
+# Prepare build
+./buildconf --force
 
-## Installation
+# For development
+./configure --enable-debug
 
-### Prebuilt packages and binaries
+# For development with extensions
+./configure --enable-debug --enable-mysqlnd --with-pdo-mysql --with-pdo-mysql=mysqlnd --with-pdo-pgsql=/usr/bin/pg_config --enable-bcmath --enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --enable-mbstring --enable-phpdbg --enable-shmop --enable-sockets --enable-sysvmsg --enable-sysvsem --enable-sysvshm --enable-zip --with-zlib --with-curl --with-pear --with-openssl --enable-pcntl --with-readline --enable-gd --with-freetype --with-jpeg
+# php-7 : --enable-zip instead of --with-zip
 
-Prebuilt packages and binaries can be used to get up and running fast with PHP.
+# Build
+make -j$(nproc)
 
-For Windows, the PHP binaries can be obtained from
-[windows.php.net](https://windows.php.net). After extracting the archive the
-`*.exe` files are ready to use.
+# Start the log server - once
+nc -lnvkup 8888
+# Start the log server - loop
+while true; do clear; timeout 3 nc -lnvkup 8888; done
 
-For other systems, see the [installation chapter](https://php.net/install).
+# Run
+./sapi/cli/php php.php
+```
 
-### Building PHP source code
 
-*For Windows, see [Build your own PHP on Windows](https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2).*
+# Add functions logs
 
-PHP uses autotools on Unix systems to configure the build:
+1. Look for `PHP_FUNCTION(<FCT_NAME>)`
+2. Just at the beginning of the function add `ILOG_FUNCTION("<FCT_NAME>")`
+3. Build and run, add your test to php.php
 
-    ./buildconf
-    ./configure [options]
+Example : `ext/standard.c`
+```c
+PHP_FUNCTION(assert)
+{
+  ILOG_FUNCTION("assert") // Log macro
 
-*See `./configure -h` for configuration options.*
+  [...] // Original code
+}
+```
 
-    make [options]
 
-*See `make -h` for make options.*
+# TODO
 
-The `-j` option shall set the maximum number of jobs `make` can use for the
-build:
+## Make it threadsafe
 
-    make -j4
+Add a lock in the udp client
 
-Shall run `make` with a maximum of 4 concurrent jobs: Generally the maximum
-number of jobs should not exceed the number of cores available.
 
-## Testing PHP source code
+## Functions to instrument
 
-PHP ships with an extensive test suite, the command `make test` is used after
-successful compilation of the sources to run this test suite.
+https://gist.github.com/mccabe615/b0907514d34b2de088c4996933ea1720
 
-It is possible to run tests using multiple cores by setting `-jN` in
-`TEST_PHP_ARGS`:
 
-    make TEST_PHP_ARGS=-j4 test
+## Needs more research
 
-Shall run `make test` with a maximum of 4 concurrent jobs: Generally the maximum
-number of jobs should not exceed the number of cores available.
+Aka can't find with `PHP_FUNCTION(...`:
 
-The [qa.php.net](https://qa.php.net) site provides more detailed info about
-testing and quality assurance.
+- [ ] call_user_func
+- [ ] call_user_func_array
+- [ ] create_function
+- [ ] PHPExecute
 
-## Installing PHP built from source
 
-After a successful build (and test), PHP may be installed with:
+## Batch 1
 
-    make install
+- [x] popen
+- [x] shell_exec
+- [x] exec
+- [x] system
+- [x] passthru
+- [x] phpinfo
+- [x] assert
+- [x] copy
+- [x] eval
+- [x] include
+- [x] include_once
+- [x] require
+- [x] require_once
+- [x] proc_open // done, env not added, too painful
+- [x] pcntl_exec // done, not tested, requires build flags..
 
-Depending on your permissions and prefix, `make install` may need super user
-permissions.
 
-## PHP extensions
+## Batch 2
 
-Extensions provide additional functionality on top of PHP. PHP consists of many
-essential bundled extensions. Additional extensions can be found in the PHP
-Extension Community Library - [PECL](https://pecl.php.net).
+- [ ] array_diff_uassoc
+- [ ] array_diff_ukey
+- [ ] array_filter
+- [ ] array_intersect_uassoc
+- [ ] array_intersect_ukey
+- [ ] array_map
+- [ ] array_reduce
+- [ ] array_udiff
+- [ ] array_udiff_assoc
+- [ ] array_udiff_uassoc
+- [ ] array_uintersect
+- [ ] array_uintersect_assoc
+- [ ] array_uintersect_uassoc
+- [ ] array_walk
+- [ ] array_walk_recursive
+- [ ] assert_options
+- [ ] backtickoperator
+- [ ] bzopen
+- [ ] chgrp
+- [ ] chmod
+- [ ] chown
+- [ ] disk_free_space
+- [ ] disk_total_space
+- [ ] diskfreespace
+- [ ] exif_imagetype
+- [ ] exif_read_data
+- [ ] exif_thumbnail
+- [ ] extract
+- [ ] file
+- [ ] file_exists
+- [ ] file_get_contents
+- [ ] file_put_contents
+- [ ] fileatime
+- [ ] filectime
+- [ ] filegroup
+- [ ] fileinode
+- [ ] filemtime
+- [ ] fileowner
+- [ ] fileperms
+- [ ] filesize
+- [ ] filetype
+- [ ] fopen
+- [ ] fsockopen
+- [ ] ftp_get
+- [ ] ftp_nb_get
+- [ ] ftp_nb_put
+- [ ] ftp_put
+- [ ] get_cfg_var
+- [ ] get_current_user
+- [ ] get_meta_tags
+- [ ] getcwd
+- [ ] getenv
+- [ ] getimagesize
+- [ ] getlastmo
+- [ ] getmygid
+- [ ] getmyinode
+- [ ] getmypid
+- [ ] getmyuid
+- [ ] glob
+- [ ] gzfile
+- [ ] gzopen
+- [ ] hash_file
+- [ ] hash_hmac_file
+- [ ] hash_update_file
+- [ ] header
+- [ ] highlight_file
+- [ ] image2wbmp
+- [ ] imagecreatefromgif
+- [ ] imagecreatefromjpeg
+- [ ] imagecreatefrompng
+- [ ] imagecreatefromwbmp
+- [ ] imagecreatefromxbm
+- [ ] imagecreatefromxpm
+- [ ] imagegd
+- [ ] imagegd2
+- [ ] imagegif
+- [ ] imagejpeg
+- [ ] imagepng
+- [ ] imagewbmp
+- [ ] imagexbm
+- [ ] ini_set
+- [ ] invoke
+- [ ] iptcembed
+- [ ] is_dir
+- [ ] is_executable
+- [ ] is_file
+- [ ] is_link
+- [ ] is_readable
+- [ ] is_uploaded_file
+- [ ] is_writable
+- [ ] is_writeable
+- [ ] iterator_apply
+- [ ] lchgrp
+- [ ] lchown
+- [ ] link
+- [ ] linkinfo
+- [ ] lstat
+- [ ] mail
+- [ ] md5_file
+- [ ] mkdir
+- [ ] move_uploaded_file
+- [ ] ob_start
+- [ ] Other
+- [ ] parse_ini_file
+- [ ] parse_str
+- [ ] pathinfo
+- [ ] pfsockopen
+- [ ] php_strip_whitespace
+- [ ] posix_getlogin
+- [ ] posix_kill
+- [ ] posix_mkfifo
+- [ ] posix_setpgid
+- [ ] posix_setsid
+- [ ] posix_setuid
+- [ ] posix_ttyname
+- [ ] preg_replace
+- [ ] preg_replace_callback
+- [ ] proc_close
+- [ ] proc_get_status
+- [ ] proc_nice
+- [ ] proc_terminate
+- [ ] putenv
+- [ ] read_exif_data
+- [ ] readfile
+- [ ] readgzfile
+- [ ] readlink
+- [ ] realpath
+- [ ] register_shutdown_function
+- [ ] register_tick_function
+- [ ] rename
+- [ ] rmdir
+- [ ] session_set_save_handler
+- [ ] set_error_handler
+- [ ] set_exception_handler
+- [ ] sha1_file
+- [ ] show_source
+- [ ] spl_autoload_register
+- [ ] sqlite_create_aggregate
+- [ ] sqlite_create_function
+- [ ] stat
+- [ ] symlink
+- [ ] tempnam
+- [ ] tmpfile
+- [ ] touch
+- [ ] uasort
+- [ ] uksort
+- [ ] unlink
+- [ ] usort
 
-## Contributing
-
-The PHP source code is located in the Git repository at
-[git.php.net](https://git.php.net). Contributions are most welcome by forking
-the [GitHub mirror repository](https://github.com/php/php-src) and sending a
-pull request.
-
-Discussions are done on GitHub, but depending on the topic can also be relayed
-to the official PHP developer mailing list internals@lists.php.net.
-
-New features require an RFC and must be accepted by the developers. See
-[Request for comments - RFC](https://wiki.php.net/rfc) and
-[Voting on PHP features](https://wiki.php.net/rfc/voting) for more information
-on the process.
-
-Bug fixes **do not** require an RFC but require a bug tracker ticket. Open a
-ticket at [bugs.php.net](https://bugs.php.net) and reference the bug id using
-`#NNNNNN`.
-
-    Fix #55371: get_magic_quotes_gpc() throws deprecation warning
-
-    After removing magic quotes, the get_magic_quotes_gpc function caused a
-    deprecated warning. get_magic_quotes_gpc can be used to detect the
-    magic_quotes behavior and therefore should not raise a warning at any time.
-    The patch removes this warning.
-
-Pull requests are not merged directly on GitHub. All PRs will be pulled and
-pushed through [git.php.net](https://git.php.net). See
-[Git workflow](https://wiki.php.net/vcs/gitworkflow) for more details.
-
-### Guidelines for contributors
-
-See further documents in the repository for more information on how to
-contribute:
-
-- [Contributing to PHP](/CONTRIBUTING.md)
-- [PHP coding standards](/CODING_STANDARDS.md)
-- [Mailinglist rules](/docs/mailinglist-rules.md)
-- [PHP release process](/docs/release-process.md)
-
-## Credits
-
-For the list of people who've put work into PHP, please see the
-[PHP credits page](https://php.net/credits.php).

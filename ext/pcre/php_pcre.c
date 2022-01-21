@@ -2379,6 +2379,7 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, int is_filter)
    Perform Perl-style regular expression replacement. */
 static PHP_FUNCTION(preg_replace)
 {
+  ILOG_FUNCTION("preg_replace");
 	preg_replace_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
