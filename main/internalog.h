@@ -27,17 +27,16 @@ void log_zval_parameters(zval* args, int argc, const char* function_name);
   args_ = safe_emalloc(argc_, sizeof(zval), 0);\
   \
   if (zend_get_parameters_array_ex(argc_, args_) == FAILURE) {\
-    efree(args_);\
-    \
     char* error_log_fmt_ = "%s : failed to get parameters";\
     ssize_t bufsz_ = snprintf(NULL, 0, error_log_fmt_, name);\
     char* error_log_ = malloc(bufsz_ + 1);\
     snprintf(error_log_, bufsz_ + 1, error_log_fmt_, name);\
     perror(error_log_);\
     free(error_log_);\
+  } else {\
+    log_zval_parameters(args_, argc_, name);\
   }\
   \
-  log_zval_parameters(args_, argc_, name);\
   efree(args_);\
 
 #pragma GCC diagnostic ignored "-Wcomment"
