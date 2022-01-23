@@ -83,6 +83,7 @@ Aka can't find with `PHP_FUNCTION(...`:
 - [x] passthru
 - [x] phpinfo
 - [x] assert
+- [x] preg_replace
 - [x] copy
 - [x] eval
 - [x] include
@@ -91,6 +92,7 @@ Aka can't find with `PHP_FUNCTION(...`:
 - [x] require_once
 - [x] proc_open // done, env not added, too painful
 - [x] pcntl_exec // done, not tested, requires build flags..
+- 
 
 
 ## Batch 2
@@ -210,7 +212,6 @@ Aka can't find with `PHP_FUNCTION(...`:
 - [ ] posix_setsid
 - [ ] posix_setuid
 - [ ] posix_ttyname
-- [ ] preg_replace
 - [ ] preg_replace_callback
 - [ ] proc_close
 - [ ] proc_get_status
