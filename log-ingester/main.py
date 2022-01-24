@@ -1,14 +1,4 @@
-"""
-# Setup & run
-poetry install
-
-# Test & Usage
-poetry run uvicorn main:app --reload --port 5555
-./sapi/cli/php sample.php
-
-# Clean before push
-poetry run black .
-"""
+#!/usr/bin/env python3
 
 import logging
 from logging.config import dictConfig
