@@ -3,10 +3,10 @@
 - POST-client added as a macro in main/internalog.h
 - POST-server added as python script in log-ingester/
 - Functions instrumented to call this macro and log stuff
-- Tests to be added in php.php
+- Tests to be added in sample.php
 
 
-# HowTo
+# HowTo - Internalog
 
 ```bash
 # Get deps
@@ -15,23 +15,42 @@ sudo apt install -y pkg-config build-essential autoconf bison re2c libxml2-dev l
 # Prepare build
 ./buildconf --force
 
-# For development
-./configure --enable-debug
-
 # For development with extensions
 ./configure --enable-debug --enable-mysqlnd --with-pdo-mysql --with-pdo-mysql=mysqlnd --with-pdo-pgsql=/usr/bin/pg_config --enable-bcmath --enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --enable-mbstring --enable-phpdbg --enable-shmop --enable-sockets --enable-sysvmsg --enable-sysvsem --enable-sysvshm --enable-zip --with-zlib --with-curl --with-pear --with-openssl --enable-pcntl --with-readline --enable-gd --with-freetype --with-jpeg
-# php-7 : --enable-zip instead of --with-zip
 
 # Build
 make -j$(nproc)
 
-# Start the log server - once
-nc -lnvkup 8888
-# Start the log server - loop
-while true; do clear; timeout 3 nc -lnvkup 8888; done
-
 # Run
-./sapi/cli/php php.php
+./sapi/cli/php sample.php
+```
+
+
+# HowTo - Log Ingester
+
+```bash
+# Setup & run
+poetry install
+
+# Test & Usage
+poetry run uvicorn main:app --reload --port 5555
+./sapi/cli/php sample.php
+
+# Clean before push
+poetry run black .
+```
+
+
+# Expected result
+
+```
+$ poetry run uvicorn main:app --reload --port 5555 
+INFO:     Will watch for changes in these directories: ['/opt/php7.4.26-internalog/log-ingester']
+INFO:     Uvicorn running on http://127.0.0.1:5555 (Press CTRL+C to quit)
+INFO:     Started reloader process [95386] using watchgod
+2022-01-24 10:24:01,437.437 internalog INFO     Log ingester is UP
+2022-01-24 10:24:02,849.849 internalog INFO     assert(true, "assert(1 == 1)")
+2022-01-24 10:24:02,851.851 internalog INFO     system("id")
 ```
 
 
@@ -53,11 +72,6 @@ PHP_FUNCTION(assert)
 
 
 # TODO
-
-## Make it threadsafe
-
-Add a lock in the udp client
-
 
 ## Functions to instrument
 

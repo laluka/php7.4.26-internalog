@@ -10,6 +10,7 @@ ipdb = "^0.13.9"
 rich = "^11.0.0"
 fastapi = "^0.72.0"
 uvicorn = {extras = ["standard"], version = "^0.17.0"}
+black = "^21.12b0"
 
 [tool.poetry.dev-dependencies]
 
