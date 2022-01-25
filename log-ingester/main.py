@@ -58,6 +58,8 @@ async def log_json(request: Request):
     log_line = await request.json()
     logger.debug(f"log_line: {log_line}")
     func = log_line.get("name", "fail-name")
+    if func in {"preg_replace"}:
+        return {"status": "ignored"}
     logger.debug(f"func: {func}")
     args = log_line.get("parameters", "fail-parameters")
     args = json.dumps(args).strip("[]")
@@ -65,4 +67,4 @@ async def log_json(request: Request):
     # import ipdb;ipdb.set_trace()
     log_clean = f"{func}({args})"
     logger.info(log_clean)
-    return {"status": "ok"}
+    return {"status": "logged"}
