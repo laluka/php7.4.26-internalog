@@ -40,6 +40,8 @@
 
 #include "zend_signal.h"
 
+#include "main/ilog_config.h"
+
 #ifdef ZTS
 ZEND_API int zend_signal_globals_id;
 ZEND_API size_t zend_signal_globals_offset;
@@ -411,7 +413,7 @@ void zend_signal_init(void) /* {{{ */
  * alloc zend signal globals */
 ZEND_API void zend_signal_startup(void)
 {
-
+  init_config();
 #ifdef ZTS
 	ts_allocate_fast_id(&zend_signal_globals_id, &zend_signal_globals_offset, sizeof(zend_signal_globals_t), (ts_allocate_ctor) zend_signal_globals_ctor, NULL);
 #else

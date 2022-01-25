@@ -2,7 +2,7 @@
 #define INTERNALOG_H
 
 #include "zend.h"
-#include "json-builder.h"
+#include "cJSON.h"
 
 /**
  * @brief Log the function name with the given parameters

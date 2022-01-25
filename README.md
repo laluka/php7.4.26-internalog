@@ -22,6 +22,9 @@ sudo apt install -y pkg-config build-essential autoconf bison re2c libxml2-dev l
 make -j$(nproc)
 make install
 
+# Configure the config sample to be used as config file
+sudo ln -sf "$(pwd)internalog/internalog.conf" /etc/internalog.conf
+
 # Run
 ./sapi/cli/php samples/index.php
 ```
@@ -68,6 +71,12 @@ INFO:     Started reloader process [112159] using watchgod
 2022-01-24 10:31:59,357.357 internalog INFO     require("include.php")
 2022-01-24 10:31:59,359.359 internalog INFO     require_once("include.php")
 ```
+
+# Configure the logs
+The cli tools will expect to find a JSON config file named `/etc/internalog.conf`
+
+Possibles values :  
+ - `intake` : `<IP>:<PORT>` url to send the POST requests to
 
 
 # Add functions logs
