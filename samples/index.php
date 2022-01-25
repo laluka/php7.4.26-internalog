@@ -5,7 +5,8 @@ assert_options(ASSERT_ACTIVE, 1); // On active les assertions (au cas où).
 phpinfo();
 
 // popen
-$handle = popen("/bin/ls", "r");
+$handle = popen("/usr/bin/whoami", "r");
+$read = fread($handle, 256);
 pclose($handle);
 
 // shell_exec
