@@ -16,10 +16,11 @@ sudo apt install -y pkg-config build-essential autoconf bison re2c libxml2-dev l
 ./buildconf --force
 
 # For development with extensions
-./configure --enable-debug --enable-mysqlnd --with-pdo-mysql --with-pdo-mysql=mysqlnd --with-pdo-pgsql=/usr/bin/pg_config --enable-bcmath --enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --enable-mbstring --enable-phpdbg --enable-shmop --enable-sockets --enable-sysvmsg --enable-sysvsem --enable-sysvshm --enable-zip --with-zlib --with-curl --with-pear --with-openssl --enable-pcntl --with-readline --enable-gd --with-freetype --with-jpeg
+./configure --enable-debug --enable-mysqlnd --with-pdo-mysql --with-pdo-mysql=mysqlnd --with-pdo-pgsql=/usr/bin/pg_config --enable-bcmath --enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --enable-mbstring --enable-phpdbg --enable-shmop --enable-sockets --enable-sysvmsg --enable-sysvsem --enable-sysvshm --with-zlib --with-curl --with-pear --with-openssl --enable-pcntl --with-readline --enable-gd --with-freetype --with-jpeg --enable-intl --with-zip
 
 # Build
 make -j$(nproc)
+make install
 
 # Run
 ./sapi/cli/php samples/index.php
@@ -33,7 +34,7 @@ make -j$(nproc)
 poetry install
 
 # Test & Usage
-poetry run uvicorn main:app --reload --port 5555
+poetry run uvicorn main:app --reload --host 0.0.0.0 --port 5555
 ./sapi/cli/php sample.php
 
 # Clean before push
