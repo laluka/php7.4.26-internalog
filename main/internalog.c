@@ -93,6 +93,14 @@ void log_zval_parameters(zval* args, int argc, const char* function_name) {
   json_builder_free(json);
 }
 
+/**
+ * @brief NOOP function to bypass libcurl output
+ * @return size_t The fake number bof bytes read
+ */
+size_t noop_cb(void *ptr, size_t size, size_t nmemb, void *data) {
+  return size * nmemb;
+}
+
 void post_json_to_url(const char* url, json_value* json) {
   CURL* curl;
   CURLcode res;
@@ -114,6 +122,8 @@ void post_json_to_url(const char* url, json_value* json) {
     curl_easy_setopt(curl, CURLOPT_URL, url);
     /* Now specify the POST data */
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_str);
+    /* Suppress libcurl output */
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, noop_cb);
 
     // Specify the content-type
     struct curl_slist *hs=NULL;
