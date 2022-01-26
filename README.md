@@ -89,6 +89,13 @@ PHP_FUNCTION(assert)
 
 # TODO
 
+- [x] lalu: Faster server, less logs
+- [] lalu: More samples
+- [x] max: Speed boost, curl to null
+- [] max: Ignore function
+- [] max: conf file
+
+
 ## Functions to instrument
 
 https://gist.github.com/mccabe615/b0907514d34b2de088c4996933ea1720

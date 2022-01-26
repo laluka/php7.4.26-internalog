@@ -39,7 +39,7 @@ logging_config = dict(
         },
     },
     root={
-        "handlers": ["h1", "h2"],
+        "handlers": ["h2"], # "h1"
         "level": common_log_level,
     },
 )
