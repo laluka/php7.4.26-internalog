@@ -349,7 +349,7 @@ if test -z "$PHP_INSTALLED_SAPIS"; then
 fi
 
 dnl Add curl dep
-LIBS="$LIBS -lcurl"
+LIBS="$LIBS -lcurl -lpthread"
 
 dnl Force ZTS.
 if test "$enable_maintainer_zts" = "yes"; then
@@ -1476,7 +1476,7 @@ PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/])
 
 PHP_ADD_SOURCES(TSRM, TSRM.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
-PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c internalog.c \
+PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c internalog.c lfqueue.c ilog_thread.c\
        ilog_config.c cJSON.c fopen_wrappers.c alloca.c  php_scandir.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c explicit_bzero.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
