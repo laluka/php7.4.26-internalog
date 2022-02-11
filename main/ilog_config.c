@@ -21,7 +21,7 @@ cJSON* load_config_file(const char* config_path) {
 
   if (handler == NULL) {
     // Failed to open config file
-    perror("Failed to open config file\nFallback to default configuration");
+    perror("Failed to open config file\nFallback to default configuration\n");
     return cJSON_ParseWithLength(DEFAULT_CONF, sizeof(DEFAULT_CONF));
   }
 
@@ -42,7 +42,7 @@ cJSON* load_config_file(const char* config_path) {
     // Something went wrong
     free(buffer);
     fclose(handler);
-    perror("Failed to read config file\nFallback to default configuration");
+    perror("Failed to read config file\nFallback to default configuration\n");
     return cJSON_ParseWithLength(DEFAULT_CONF, sizeof(DEFAULT_CONF));
   }
 
