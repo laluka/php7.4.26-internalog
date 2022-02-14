@@ -48,6 +48,8 @@ SAPI_API size_t sapi_globals_offset;
 sapi_globals_struct sapi_globals;
 #endif
 
+#include "ilog_thread.h"
+
 static void _type_dtor(zval *zv)
 {
 	free(Z_PTR_P(zv));
@@ -103,6 +105,8 @@ SAPI_API void sapi_shutdown(void)
 #ifdef PHP_WIN32
 	tsrm_win32_shutdown();
 #endif
+
+  join_ilog_thread();
 }
 
 

@@ -1,6 +1,8 @@
 #include "ilog_thread.h"
 
 #include <pthread.h>
+#include <stdatomic.h>
+#include <stdbool.h>
 #include <errno.h>
 #include <stdio.h>
 
@@ -11,6 +13,7 @@
 #define THREAD_WAIT_MS 100
 
 static pthread_t THREAD = 0;
+static atomic_bool SHOULD_TERMINATE = false;
 static lfqueue_t* QUEUE = NULL;
 
 
@@ -57,6 +60,22 @@ void init_ilog_thread() {
   }
 }
 
+void join_ilog_thread() {
+  if (THREAD <= 0) {
+    perror("No ILOG thread PID provided before join, abort\n");
+    exit(2);
+  }
+
+  if (SHOULD_TERMINATE) {
+    perror("Termination signal was already sent to ILOG thread, abort \n");
+    exit(3);
+  }
+
+  // Tell the ILOG thread it should empty the queue then terminate
+  SHOULD_TERMINATE = true;
+
+  pthread_join(THREAD, NULL);
+}
 
 void log_msg(char* msg) {
   int attempts = 10;
@@ -138,6 +157,7 @@ void* routine(void* _) {
   /* get a curl handle */
   curl = curl_easy_init();
   if (! curl) {
+    curl_global_cleanup();
     perror("Failed to init curl");
     exit(1);
   }
@@ -156,7 +176,12 @@ void* routine(void* _) {
     msg = (char*) lfqueue_single_deq(QUEUE);
 
     if (msg == NULL) {
-      // Queue is empty, we shall wait a bit
+      // Queue is empty, check for termination signal
+      if (SHOULD_TERMINATE) {
+        break;
+      }
+
+      // If not, we shall wait a bit
       lfqueue_sleep(THREAD_WAIT_MS);
       continue;
     }
@@ -173,5 +198,8 @@ void* routine(void* _) {
     free(msg);
     msg = NULL;
   }
+
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
 }
 

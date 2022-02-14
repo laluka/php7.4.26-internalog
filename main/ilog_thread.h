@@ -2,7 +2,7 @@
 #define __ILOG_THREAD_H__
 
 void init_ilog_thread();
-void delete_ilog_thread();  //TODO
+void join_ilog_thread();
 
 void log_msg(char* msg);
 
