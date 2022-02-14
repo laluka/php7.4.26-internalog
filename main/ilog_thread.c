@@ -5,10 +5,11 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <stdio.h>
+#include <string.h>
 
-#include <curl/curl.h>
 #include "lfqueue.h"
 #include "ilog_config.h"
+#include "ilog_udpclient.h"
 
 #define THREAD_WAIT_MS 100
 
@@ -93,41 +94,16 @@ void log_msg(char* msg) {
   }
 }
 
-
-/**
- * @brief NOOP function to bypass libcurl output
- * @return size_t The fake number bof bytes read
- */
-size_t noop_cb(void *ptr, size_t size, size_t nmemb, void *data) {
-  return size * nmemb;
-}
-
-
 void* routine(void* _) {
   char* msg = NULL;
   
   // init the UDP context
-
-  // init CURL, to be removed
-  CURL* curl;
-  CURLcode res;
-  curl_global_init(CURL_GLOBAL_ALL);
-
-  /* get a curl handle */
-  curl = curl_easy_init();
-  if (! curl) {
-    curl_global_cleanup();
-    perror("Failed to init curl");
+  ilog_udp_client_t udp_client;
+  if (ilog_start_udp_client(&udp_client, 5555) != 0) {
+    perror("Failed to init ILOG udp client\n");
     exit(1);
   }
 
-  // Setup constants
-  const char* url = ilog_config_get_url();
-  curl_easy_setopt(curl, CURLOPT_URL, url);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, noop_cb);
-  struct curl_slist *hs=NULL;
-  hs = curl_slist_append(hs, "Content-Type: application/json");
-  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hs);
 
   for (;;) {
     // routine
@@ -145,20 +121,12 @@ void* routine(void* _) {
       continue;
     }
 
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, msg);
+    ilog_log_msg_to_udp(&udp_client, msg, strlen(msg));
 
-    /* Perform the request, res will get the return code */
-    res = curl_easy_perform(curl);
-    /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
-    
     free(msg);
     msg = NULL;
   }
 
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  ilog_close_udp_client(&udp_client);
 }
 
