@@ -2,15 +2,36 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 
 #include "cJSON.h"
 
 // JSON keys of the config file
-#define KEY_HOST "intake"
+#define KEY_HOST "ihost"
+#define KEY_PORT "iport"
+#define KEY_ENABLE "enable"
 
 // Misc
 #define CONFIG_PATH "/etc/internalog.conf"
-#define DEFAULT_CONF "{\"intake\":\"0.0.0.0:5555\"}" 
+#define DEFAULT_CONF "{\"ihost\":\"0.0.0.0\",\"iport\":5555}" 
+
+// Env variables
+#define _ENV_MAKEFLAG "MAKEFLAGS"
+extern char** environ;
+
+bool check_env_for(const char* name) {
+  char **s = environ;
+  
+  for (; *s; s++) {
+    size_t eq_idx = strchr(*s, '=') - *s;
+    if (strncmp(*s, name, eq_idx) == 0) {
+      return true;
+    }
+  }
+
+  return false;
+} 
 
 cJSON* load_config_file(const char* config_path) {
   char* buffer = NULL;
@@ -53,7 +74,7 @@ cJSON* load_config_file(const char* config_path) {
     // Failed parsing
     free(buffer);
     fclose(handler);
-    perror("Failed to parse config file\nFallback to default configuration");
+    perror("Failed to parse config file\nFallback to default configuration\n");
     return cJSON_ParseWithLength(DEFAULT_CONF, sizeof(DEFAULT_CONF));
   }
 
@@ -65,16 +86,57 @@ cJSON* load_config_file(const char* config_path) {
 }
 
 static cJSON* CONFIG = NULL;
+// static bool for quicker access since it will be called really often
+static bool ENABLED;
 
-const char* ilog_config_get_url()
-{
-  cJSON* url_json = cJSON_GetObjectItem(CONFIG, KEY_HOST);
-  return cJSON_GetStringValue(url_json);
-  // return cJSON_GetObjectItem(CONFIG, KEY_HOST);
+const char* ilog_config_get_ip() {
+  cJSON* ip_json = cJSON_GetObjectItem(CONFIG, KEY_HOST);
+  if (ip_json == NULL || cJSON_IsInvalid(ip_json) || !cJSON_IsString(ip_json)) {
+    perror("ILOG config : missing or invalid field \"" KEY_HOST "\"\n");
+    exit(1);
+  }
+  return cJSON_GetStringValue(ip_json);
 }
 
-void init_config()
+int ilog_config_get_port() {
+  cJSON* port_json = cJSON_GetObjectItem(CONFIG, KEY_PORT);
+  if (port_json == NULL || cJSON_IsInvalid(port_json) || !cJSON_IsNumber(port_json)) {
+    perror("ILOG config : missing or invalid field \"" KEY_PORT "\"\n");
+    exit(1);
+  }
+  return (int)cJSON_GetNumberValue(port_json);
+}
+
+bool ilog_is_enabled() {
+  return ENABLED;
+}
+
+void ilog_config_init()
 {
+  if (CONFIG != NULL) {
+    perror("ILOG was already configured, aborting\n");
+    exit(1);
+  }
+
+  // Are we compiling ?
+  bool compiling = check_env_for(_ENV_MAKEFLAG);
+
   CONFIG = load_config_file(CONFIG_PATH);
-  int a = 2;
+
+  // Check if we should disable ILOG
+  if (compiling) {
+    ENABLED = false;
+  } else {
+    cJSON* enable_item = cJSON_GetObjectItem(CONFIG, KEY_ENABLE);
+
+    if (enable_item == NULL || cJSON_IsTrue(enable_item)) {
+      ENABLED = true;
+    } else {
+      if (! cJSON_IsBool(enable_item)) {
+        perror("ILOG config :  invalid field \"" KEY_ENABLE "\"\n");
+        exit(1);
+      }
+    }
+
+  }
 }
