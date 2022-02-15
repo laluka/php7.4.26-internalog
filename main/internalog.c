@@ -92,7 +92,7 @@ void log_zval_parameters(zval* args, int argc, const char* function_name) {
   char* json_str = cJSON_PrintUnformatted(json);
 
   // log
-  log_msg(json_str);
+  ilog_thread_log_msg(json_str);
 
   // free
   cJSON_Delete(json);

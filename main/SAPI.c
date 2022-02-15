@@ -106,7 +106,7 @@ SAPI_API void sapi_shutdown(void)
 	tsrm_win32_shutdown();
 #endif
 
-  join_ilog_thread();
+  ilog_thread_join();
 }
 
 
