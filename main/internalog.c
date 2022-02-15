@@ -1,6 +1,7 @@
 #include "internalog.h"
 
 #include "ilog_thread.h"
+#include "ilog_config.h"
 
 
 cJSON* zend_type_to_json_type(zval* val);
@@ -70,6 +71,8 @@ cJSON* zend_type_to_json_type(zval* val) {
 }
 
 void log_zval_parameters(zval* args, int argc, const char* function_name) {
+  if (! ilog_is_enabled()) { return; }
+  
   // Create the function payload
   cJSON* json = cJSON_CreateObject();
   cJSON_AddItemToObject(json, "name", cJSON_CreateString(function_name));

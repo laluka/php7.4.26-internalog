@@ -24,6 +24,8 @@ void* routine(void*);
 
 // Definitions
 void init_ilog_thread() {
+  if (! ilog_is_enabled()) { return; }
+
   if (THREAD != 0) {
     perror("Trying to start the ilog thread a second time, abort\n");
     exit(1);
@@ -62,6 +64,8 @@ void init_ilog_thread() {
 }
 
 void join_ilog_thread() {
+  if (! ilog_is_enabled()) { return; }
+
   if (THREAD <= 0) {
     perror("No ILOG thread PID provided before join, abort\n");
     exit(2);
@@ -97,13 +101,16 @@ void log_msg(char* msg) {
 void* routine(void* _) {
   char* msg = NULL;
   
+  int port = ilog_config_get_port();
+  const char* ip = ilog_config_get_ip();
+
   // init the UDP context
   ilog_udp_client_t udp_client;
-  if (ilog_start_udp_client(&udp_client, 5555) != 0) {
+  if (ilog_start_udp_client(&udp_client, port, ip) != 0) {
+    free(ip);
     perror("Failed to init ILOG udp client\n");
     exit(1);
   }
-
 
   for (;;) {
     // routine
@@ -127,6 +134,7 @@ void* routine(void* _) {
     msg = NULL;
   }
 
+  free(ip);
   ilog_close_udp_client(&udp_client);
 }
 

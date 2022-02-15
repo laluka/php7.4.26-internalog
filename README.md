@@ -76,8 +76,12 @@ INFO:     Started reloader process [112159] using watchgod
 The cli tools will expect to find a JSON config file named `/etc/internalog.conf`
 
 Possibles values :  
- - `intake` : `<IP>:<PORT>` url to send the POST requests to
+ - `ihost` : `<IP>` (a string) The IP to send UDP packages to
+ - `iport` : `<PORT>` (a number) The port to send UDP packages to
+ - (Optional) : `true|false` Enable/disable ILOG
 
+**NOTE :** Since PHP is called during its own compilation, we try to read the
+`MAKEFLAGS` env variable, if it exists we disable ILOG (overrides `enable` setting)
 
 # Add functions logs
 
@@ -102,7 +106,8 @@ PHP_FUNCTION(assert)
 - [] lalu: More samples
 - [x] max: Speed boost, curl to null
 - [] max: Ignore function
-- [] max: conf file
+- [x] max: conf file
+- [x] max: thread the logging process
 
 
 ## Functions to instrument
