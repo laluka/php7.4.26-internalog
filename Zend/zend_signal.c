@@ -415,7 +415,7 @@ void zend_signal_init(void) /* {{{ */
 ZEND_API void zend_signal_startup(void)
 {
   ilog_config_init();
-  init_ilog_thread();
+  ilog_thread_init();
 #ifdef ZTS
 	ts_allocate_fast_id(&zend_signal_globals_id, &zend_signal_globals_offset, sizeof(zend_signal_globals_t), (ts_allocate_ctor) zend_signal_globals_ctor, NULL);
 #else

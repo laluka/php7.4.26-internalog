@@ -23,7 +23,7 @@ void* routine(void*);
 
 
 // Definitions
-void init_ilog_thread() {
+void ilog_thread_init() {
   if (! ilog_is_enabled()) { return; }
 
   if (THREAD != 0) {
@@ -63,7 +63,7 @@ void init_ilog_thread() {
   }
 }
 
-void join_ilog_thread() {
+void ilog_thread_join() {
   if (! ilog_is_enabled()) { return; }
 
   if (THREAD <= 0) {
@@ -82,7 +82,7 @@ void join_ilog_thread() {
   pthread_join(THREAD, NULL);
 }
 
-void log_msg(char* msg) {
+void ilog_thread_log_msg(char* msg) {
   int attempts = 10;
 
   /*Enqueue*/
