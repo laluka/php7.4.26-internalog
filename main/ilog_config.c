@@ -18,6 +18,7 @@
 
 // Env variables
 #define _ENV_MAKEFLAG "MAKEFLAGS"
+#define _ENV_TEST_PHP_SRCDIR "TEST_PHP_SRCDIR"
 extern char** environ;
 
 bool check_env_for(const char* name) {
@@ -118,8 +119,9 @@ void ilog_config_init()
     exit(1);
   }
 
-  // Are we compiling ?
-  bool compiling = check_env_for(_ENV_MAKEFLAG);
+  // PHP calls itself during compilation, we want to disable during compilation
+  // but not during testing
+  bool compiling = check_env_for(_ENV_MAKEFLAG) && (! check_env_for(_ENV_TEST_PHP_SRCDIR));
 
   CONFIG = load_config_file(CONFIG_PATH);
 
