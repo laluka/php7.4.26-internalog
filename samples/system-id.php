@@ -1,0 +1,2 @@
+<?php
+system("id");

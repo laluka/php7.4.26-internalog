@@ -23,7 +23,7 @@ make -j$(nproc)
 make install
 
 # Configure the config sample to be used as config file
-sudo ln -sf "$(pwd)internalog/internalog.conf" /etc/internalog.conf
+sudo ln -sf "$(pwd)/internalog/internalog.conf" /etc/internalog.conf
 
 # Run
 ./sapi/cli/php samples/index.php
@@ -38,7 +38,7 @@ poetry install
 
 # Test & Usage
 poetry run uvicorn main:app --reload --host 0.0.0.0 --port 5555
-./sapi/cli/php sample.php
+./sapi/cli/php samples/index.php
 
 # Clean before push
 poetry run black .
