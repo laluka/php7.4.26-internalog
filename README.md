@@ -38,7 +38,7 @@ poetry install
 
 # Test & Usage
 poetry run uvicorn main:app --reload --host 0.0.0.0 --port 5555
-./sapi/cli/php sample.php
+./sapi/cli/php samples/index.php
 
 # Clean before push
 poetry run black .
