@@ -37,7 +37,7 @@ sudo ln -sf "$(pwd)/internalog/internalog.conf" /etc/internalog.conf
 poetry install
 
 # Test & Usage
-poetry run uvicorn main:app --reload --host 0.0.0.0 --port 5555
+poetry run python udp-ingester.py &
 ./sapi/cli/php samples/index.php
 
 # Clean before push
