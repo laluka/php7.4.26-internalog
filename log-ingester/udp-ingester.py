@@ -19,12 +19,11 @@ def udp_server(host='127.0.0.1', port=5555):
 
 
 for data in udp_server():
-    if "sulf" in data.lower():
-        log_blob = json.loads(data)
-        should_print = True
-        for ignored_fct in ignored_fcts:
-            if ignored_fct == log_blob.get("name"):
-                should_print = False
-                continue
-        if should_print:
-            pprint(log_blob)
+      log_blob = json.loads(data)
+      should_print = True
+      for ignored_fct in ignored_fcts:
+          if ignored_fct == log_blob.get("name"):
+              should_print = False
+              continue
+      if should_print:
+          pprint(log_blob)
