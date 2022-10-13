@@ -1,16 +1,20 @@
+# Php-internalog
+
+Hi folks, please note this repo is ~not maintained anymore~ as we explained in the `Rump a Rennes` (and soon `GreHack`) talk what is the future of this project: [Snuffleupagus](https://snuffleupagus.readthedocs.io/installation.html)!
+
+That being said, this project contains multiple approaches related to php introspection for offensive research purpose.
+
+
 # Concept
 
-- POST-client added as a macro in main/internalog.h
-- POST-server added as python script in log-ingester/
-- Functions instrumented to call this macro and log stuff
-- Tests to be added in sample.php
+Long story short, we create a C macro that will help us send the function's name and parameters value in a lock-free FIFO queue that will then send async POST requests to out python backend that can be easily tweaked for more filtering. So you can know what's going on in PHP without suffering from the huge xDebug's overhead! ^.^
 
 
 # HowTo - Internalog
 
 ```bash
 # Get deps
-sudo apt install -y pkg-config build-essential autoconf bison re2c libxml2-dev libsqlite3-dev libreadline-dev libzip-dev libssl-dev libcurl4-openssl-dev libonig-dev libpq-dev libreadline-dev libpng-dev libjpeg-dev libfreetype-dev
+sudo apt install -y pkg-config build-essential autoconf bison re2c libxml2-dev libsqlite3-dev libreadline-dev libzip-dev libssl-dev libcurl4-openssl-dev libonig-dev libpq-dev libreadline-dev libpng-dev libjpeg-dev libfreetype-dev libsodium-dev
 
 # Prepare build
 ./buildconf --force
@@ -25,51 +29,46 @@ sudo make install
 # Configure the config sample to be used as config file
 sudo ln -sf "$(pwd)/internalog/internalog.conf" /etc/internalog.conf
 
+# Turn on the log-ingester (new shell, ever heard of tmux split pane?)
+cd log-ingester && poetry install && poetry run python udp-ingester.py
+
 # Run
 ./sapi/cli/php samples/index.php
-```
-
-
-# HowTo - Log Ingester
-
-```bash
-# Setup & run
-poetry install
-
-# Test & Usage
-poetry run python udp-ingester.py &
-./sapi/cli/php samples/index.php
-
-# Clean before push
-poetry run black .
 ```
 
 
 # Expected result
 
 ```
-$ poetry run uvicorn main:app --reload --port 5555 
-INFO:     Will watch for changes in these directories: ['/opt/php7.4.26-internalog/log-ingester']
-INFO:     Uvicorn running on http://127.0.0.1:5555 (Press CTRL+C to quit)
-INFO:     Started reloader process [112159] using watchgod
-2022-01-24 10:31:58,657.657 internalog INFO     Log ingester is UP
-2022-01-24 10:31:59,310.310 internalog INFO     phpinfo()
-2022-01-24 10:31:59,316.316 internalog INFO     popen("/bin/ls", "r")
-2022-01-24 10:31:59,321.321 internalog INFO     shell_exec("ls")
-2022-01-24 10:31:59,325.325 internalog INFO     exec("whoami")
-2022-01-24 10:31:59,328.328 internalog INFO     system("whoami")
-2022-01-24 10:31:59,331.331 internalog INFO     passthru("whoami")
-2022-01-24 10:31:59,335.335 internalog INFO     assert("$test == 1")
-2022-01-24 10:31:59,337.337 internalog INFO     preg_replace("/quick/", "/brown/", "/fox/"], ["bear", "black", "slow"], "The quick brown fox jumps over the lazy dog.")
-2022-01-24 10:31:59,339.339 internalog INFO     copy("not_a_file", "not_a_file_either")
-2022-01-24 10:31:59,341.341 internalog INFO     proc_open("\"whoami\"", ["zend_resource : not yet supported", "zend_resource : not yet supported", "zend_resource : not yet supported"], "unknown type")
-2022-01-24 10:31:59,348.348 internalog INFO     eval("echo \"test \\n\";")
-2022-01-24 10:31:59,351.351 internalog INFO     include("include.php")
-2022-01-24 10:31:59,353.353 internalog INFO     require("include.php")
-2022-01-24 10:31:59,354.354 internalog INFO     include_once("include.php")
-2022-01-24 10:31:59,356.356 internalog INFO     require_once("include.php")
-2022-01-24 10:31:59,357.357 internalog INFO     require("include.php")
-2022-01-24 10:31:59,359.359 internalog INFO     require_once("include.php")
+$ poetry run python udp-ingester.py
+Listening on udp 127.0.0.1:5555
+{'name': 'phpinfo', 'parameters': []}
+{'name': 'popen', 'parameters': ['/usr/bin/whoami', 'r']}
+{'name': 'shell_exec', 'parameters': ['ls']}
+{'name': 'exec', 'parameters': ['whoami']}
+{'name': 'system', 'parameters': ['whoami']}
+{'name': 'passthru', 'parameters': ['whoami']}
+{'name': 'assert', 'parameters': ['$test == 1']}
+{'name': 'copy', 'parameters': ['not_a_file', 'not_a_file_either']}
+{
+    'name': 'proc_open',
+    'parameters': [
+        '"whoami"',
+        [
+            'zend_resource : not yet supported',
+            'zend_resource : not yet supported',
+            'zend_resource : not yet supported'
+        ],
+        'unknown type'
+    ]
+}
+{'name': 'eval', 'parameters': ['echo "test \\n";']}
+{'name': 'include', 'parameters': ['include.php']}
+{'name': 'require', 'parameters': ['include.php']}
+{'name': 'include_once', 'parameters': ['include.php']}
+{'name': 'require_once', 'parameters': ['include.php']}
+{'name': 'require', 'parameters': ['include.php']}
+{'name': 'require_once', 'parameters': ['include.php']}
 ```
 
 # Configure the logs
@@ -98,16 +97,6 @@ PHP_FUNCTION(assert)
   [...] // Original code
 }
 ```
-
-
-# TODO
-
-- [x] lalu: Faster server, less logs
-- [] lalu: More samples
-- [x] max: Speed boost, curl to null
-- [] max: Ignore function
-- [x] max: conf file
-- [x] max: thread the logging process
 
 
 ## Functions to instrument
